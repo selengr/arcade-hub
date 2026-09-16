@@ -17,7 +17,7 @@ import "./balloons.css";
 const BEST_KEY = "arcade-balloons-best";
 const STREAK_MS = 1100;
 
-type Phase = "running" | "over";
+type Phase = "ready" | "running" | "over";
 
 export function renderBalloons(root: HTMLElement): void {
   markPlayed("balloons");
@@ -27,7 +27,7 @@ export function renderBalloons(root: HTMLElement): void {
   let lives = 3;
   let streak = 0;
   let lastPopAt = 0;
-  let phase: Phase = "running";
+  let phase: Phase = "ready";
   let raf = 0;
   let lastTs = 0;
   let spawnAcc = 0;
@@ -38,7 +38,7 @@ export function renderBalloons(root: HTMLElement): void {
       <section class="panel">
         <h2>Balloon Pop</h2>
         <ol class="game-how">
-          <li>Tap balloons before they float off the top.</li>
+          <li>Press <strong>Start</strong>, then tap balloons before they float away.</li>
           <li>Pop quickly to build a <strong>streak</strong> for bonus points.</li>
           <li>You lose a life for each balloon that escapes.</li>
         </ol>
@@ -47,12 +47,12 @@ export function renderBalloons(root: HTMLElement): void {
           <span class="score-pill" data-lives>Lives 3</span>
           <span class="score-pill" data-best>Best ${best}</span>
         </div>
-        <p class="status" data-status aria-live="polite">Tap the balloons!</p>
+        <p class="status" data-status aria-live="polite">Press Start</p>
         <div class="balloons-wrap">
           <canvas class="balloons-canvas" width="360" height="480" aria-label="Balloon Pop"></canvas>
         </div>
         <div class="row" style="margin-top:1rem">
-          <button class="btn btn-primary" type="button" data-again hidden>Retry run</button>
+          <button class="btn btn-primary" type="button" data-again>Start</button>
         </div>
       </section>
     </div>
@@ -79,9 +79,16 @@ export function renderBalloons(root: HTMLElement): void {
     if (bestEl) bestEl.textContent = `Best ${best}`;
     if (statusEl) {
       statusEl.textContent =
-        phase === "over" ? "Game over — tap to retry" : runningStatus();
+        phase === "ready"
+          ? "Press Start or tap the board"
+          : phase === "over"
+            ? "Game over — tap to retry"
+            : runningStatus();
     }
-    if (againBtn) againBtn.hidden = phase === "running";
+    if (againBtn) {
+      againBtn.hidden = phase === "running";
+      againBtn.textContent = phase === "ready" ? "Start" : "Retry run";
+    }
   };
 
   const draw = (): void => {
@@ -108,6 +115,16 @@ export function renderBalloons(root: HTMLElement): void {
       ctx.lineTo(b.x, b.y + b.r * 1.6);
       ctx.stroke();
     }
+
+    if (phase === "ready") {
+      ctx.fillStyle = "rgba(232, 244, 241, 0.92)";
+      ctx.font = "700 22px Syne, sans-serif";
+      ctx.textAlign = "center";
+      ctx.fillText("Tap to start", canvas.width / 2, canvas.height * 0.48);
+      ctx.font = "600 14px Outfit, sans-serif";
+      ctx.fillStyle = "rgba(155, 184, 176, 0.95)";
+      ctx.fillText("then tap balloons to pop", canvas.width / 2, canvas.height * 0.54);
+    }
   };
 
   const stop = (): void => {
@@ -128,6 +145,7 @@ export function renderBalloons(root: HTMLElement): void {
     pushHistory("Balloon Pop", `score ${score}`);
     maybeCompleteDaily("balloons", score);
     syncHud();
+    draw();
   };
 
   const frame = (ts: number): void => {
@@ -161,18 +179,30 @@ export function renderBalloons(root: HTMLElement): void {
     raf = requestAnimationFrame(frame);
   };
 
-  const start = (): void => {
+  const resetReady = (): void => {
     stop();
     balloons = [];
     score = 0;
     lives = 3;
     streak = 0;
     lastPopAt = 0;
-    phase = "running";
+    phase = "ready";
     syncHud();
     draw();
-    if (canvas) balloons.push(spawnBalloon(canvas.width, canvas.height));
+  };
+
+  const beginRun = (): void => {
+    if (!canvas) return;
+    phase = "running";
+    syncHud();
+    balloons.push(spawnBalloon(canvas.width, canvas.height));
+    draw();
     raf = requestAnimationFrame(frame);
+  };
+
+  const retry = (): void => {
+    resetReady();
+    beginRun();
   };
 
   canvas?.addEventListener(
@@ -181,9 +211,14 @@ export function renderBalloons(root: HTMLElement): void {
       if (!canvas) return;
       e.preventDefault();
       unlockAudio();
+      if (phase === "ready") {
+        sfx.tap();
+        beginRun();
+        return;
+      }
       if (phase === "over") {
         sfx.tap();
-        start();
+        retry();
         return;
       }
       if (phase !== "running") return;
@@ -207,12 +242,26 @@ export function renderBalloons(root: HTMLElement): void {
 
   againBtn?.addEventListener("click", () => {
     sfx.tap();
-    start();
+    unlockAudio();
+    if (phase === "ready") beginRun();
+    else retry();
   });
+
+  const onKey = (e: KeyboardEvent): void => {
+    if (e.code !== "Space" && e.key !== " ") return;
+    e.preventDefault();
+    unlockAudio();
+    if (phase === "ready") beginRun();
+    else if (phase === "over") retry();
+  };
+  window.addEventListener("keydown", onKey);
 
   const host = root as HTMLElement & { __balloonsCleanup?: () => void };
   host.__balloonsCleanup?.();
-  host.__balloonsCleanup = stop;
+  host.__balloonsCleanup = () => {
+    stop();
+    window.removeEventListener("keydown", onKey);
+  };
 
-  start();
+  resetReady();
 }
