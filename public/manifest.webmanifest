@@ -1,17 +1,29 @@
 {
   "name": "Arcade Hub",
   "short_name": "Arcade",
-  "description": "Eight focused browser games — Snake, Flappy Lite, Breakout, and more.",
+  "description": "Eight small browser games — Snake, Flappy Lite, Breakout, and more.",
   "start_url": "/arcade-hub/",
   "display": "standalone",
   "background_color": "#0b1f24",
   "theme_color": "#0b1f24",
   "icons": [
     {
-      "src": "/arcade-hub/favicon.svg",
-      "sizes": "any",
-      "type": "image/svg+xml",
+      "src": "/arcade-hub/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
       "purpose": "any"
+    },
+    {
+      "src": "/arcade-hub/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/arcade-hub/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
     }
   ]
 }
