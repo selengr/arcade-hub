@@ -16,10 +16,9 @@ const HELP: Record<string, HelpContent> = {
   tictactoe: {
     title: "How to play Tic-Tac-Toe",
     steps: [
-      "Get three in a row — horizontal, vertical, or diagonal.",
-      "Vs AI: you are X. Hard mode never loses if it plays perfectly.",
-      "Vs friend: pass the device; X goes first.",
-      "Number keys 1–9 pick cells (top-left is 1).",
+      "You are X. Tap a cell to place your mark.",
+      "Get three in a row — across, down, or diagonal.",
+      "The AI plays O. Beat it to score a win.",
     ],
   },
   memory: {
