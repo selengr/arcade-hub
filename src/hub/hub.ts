@@ -23,11 +23,11 @@ const games: Array<{
   blurb: string;
   tone: string;
 }> = [
-  { route: "snake", title: "Snake", blurb: "Grow fast. Don't bite yourself.", tone: "tone-lime" },
+  { route: "snake", title: "Snake", blurb: "Press Start, then steer and eat.", tone: "tone-lime" },
   { route: "flappy", title: "Flappy Lite", blurb: "Press Flap to stay up. Fly through gaps.", tone: "tone-teal" },
-  { route: "balloons", title: "Balloon Pop", blurb: "Press Start, then tap balloons to pop.", tone: "tone-teal" },
   { route: "breakout", title: "Breakout", blurb: "Press Start, then bounce the ball.", tone: "tone-coral" },
-  { route: "mole", title: "Whack-a-Mole", blurb: "Hit moles before they hide.", tone: "tone-gold" },
+  { route: "balloons", title: "Balloon Pop", blurb: "Press Start, then tap balloons to pop.", tone: "tone-teal" },
+  { route: "mole", title: "Whack-a-Mole", blurb: "Press Start — then tap moles for 30s.", tone: "tone-gold" },
   { route: "reaction", title: "Reaction Duel", blurb: "Wait for GO. Beat the rival.", tone: "tone-coral" },
   { route: "tictactoe", title: "Tic-Tac-Toe", blurb: "Beat the AI or a friend.", tone: "tone-foam" },
   { route: "memory", title: "Memory", blurb: "Flip cards. Match the pairs.", tone: "tone-lime" },
