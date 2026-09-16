@@ -25,8 +25,8 @@ const games: Array<{
 }> = [
   { route: "snake", title: "Snake", blurb: "Grow fast. Don't bite yourself.", tone: "tone-lime" },
   { route: "flappy", title: "Flappy Lite", blurb: "Press Flap to stay up. Fly through gaps.", tone: "tone-teal" },
-  { route: "breakout", title: "Breakout", blurb: "Bounce the ball. Smash the wall.", tone: "tone-coral" },
-  { route: "balloons", title: "Balloon Pop", blurb: "Tap pops. Streaks score bigger.", tone: "tone-teal" },
+  { route: "balloons", title: "Balloon Pop", blurb: "Press Start, then tap balloons to pop.", tone: "tone-teal" },
+  { route: "breakout", title: "Breakout", blurb: "Press Start, then bounce the ball.", tone: "tone-coral" },
   { route: "mole", title: "Whack-a-Mole", blurb: "Hit moles before they hide.", tone: "tone-gold" },
   { route: "reaction", title: "Reaction Duel", blurb: "Wait for GO. Beat the rival.", tone: "tone-coral" },
   { route: "tictactoe", title: "Tic-Tac-Toe", blurb: "Beat the AI or a friend.", tone: "tone-foam" },
