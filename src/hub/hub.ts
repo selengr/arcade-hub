@@ -29,7 +29,7 @@ const games: Array<{
   { route: "balloons", title: "Balloon Pop", blurb: "Press Start, then tap balloons to pop.", tone: "tone-teal" },
   { route: "mole", title: "Whack-a-Mole", blurb: "Press Start — then tap moles for 30s.", tone: "tone-gold" },
   { route: "reaction", title: "Reaction Duel", blurb: "Wait for GO. Beat the rival.", tone: "tone-coral" },
-  { route: "tictactoe", title: "Tic-Tac-Toe", blurb: "Beat the AI or a friend.", tone: "tone-foam" },
+  { route: "tictactoe", title: "Tic-Tac-Toe", blurb: "You are X. Beat the AI.", tone: "tone-foam" },
   { route: "memory", title: "Memory", blurb: "Flip cards. Match the pairs.", tone: "tone-lime" },
 ];
 
