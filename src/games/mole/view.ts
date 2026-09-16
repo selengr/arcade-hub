@@ -20,7 +20,7 @@ import "./mole.css";
 
 const BEST_KEY = "arcade-mole-best";
 
-type Phase = "running" | "over";
+type Phase = "ready" | "running" | "over";
 
 export function renderMole(root: HTMLElement): void {
   markPlayed("mole");
@@ -28,7 +28,7 @@ export function renderMole(root: HTMLElement): void {
   let holes: Hole[] = createHoles();
   let score = 0;
   let streak = 0;
-  let phase: Phase = "running";
+  let phase: Phase = "ready";
   let raf = 0;
   let lastTs = 0;
   let spawnAcc = 0;
@@ -40,16 +40,16 @@ export function renderMole(root: HTMLElement): void {
       <section class="panel">
         <h2>Whack-a-Mole</h2>
         <ol class="game-how">
-          <li>Watch the holes — moles pop up for a short time.</li>
+          <li>Press <strong>Start</strong> — the 30-second timer begins then.</li>
           <li>Tap a mole while it's up to score.</li>
-          <li>You have <strong>30 seconds</strong>. Speed rises as you score.</li>
+          <li>Speed rises as you score. Keep a streak going!</li>
         </ol>
         <div class="scoreboard">
           <span class="score-pill" data-score>Score 0</span>
           <span class="score-pill" data-time>Time 30</span>
           <span class="score-pill" data-best>Best ${best}</span>
         </div>
-        <p class="status" data-status aria-live="polite">Whack!</p>
+        <p class="status" data-status aria-live="polite">Press Start</p>
         <div class="mole-grid" data-grid aria-label="Mole holes">
           ${holes
             .map(
@@ -61,7 +61,7 @@ export function renderMole(root: HTMLElement): void {
             .join("")}
         </div>
         <div class="row" style="margin-top:1rem">
-          <button class="btn btn-primary" type="button" data-again hidden>Retry run</button>
+          <button class="btn btn-primary" type="button" data-again>Start</button>
         </div>
       </section>
     </div>
@@ -92,13 +92,18 @@ export function renderMole(root: HTMLElement): void {
     if (bestEl) bestEl.textContent = `Best ${best}`;
     if (statusEl) {
       statusEl.textContent =
-        phase === "over"
-          ? `Time's up · ${score} — tap to retry`
-          : streak >= 3
-            ? `${streak} streak!`
-            : "Whack!";
+        phase === "ready"
+          ? "Press Start — timer waits for you"
+          : phase === "over"
+            ? `Time's up · ${score} — tap to retry`
+            : streak >= 3
+              ? `${streak} streak!`
+              : "Whack!";
     }
-    if (againBtn) againBtn.hidden = phase === "running";
+    if (againBtn) {
+      againBtn.hidden = phase === "running";
+      againBtn.textContent = phase === "ready" ? "Start" : "Retry run";
+    }
   };
 
   const stop = (): void => {
@@ -152,27 +157,42 @@ export function renderMole(root: HTMLElement): void {
     raf = requestAnimationFrame(frame);
   };
 
-  const start = (): void => {
+  const resetReady = (): void => {
     stop();
     holes = createHoles();
     score = 0;
     streak = 0;
     leftMs = ROUND_MS;
-    phase = "running";
+    phase = "ready";
     paintHoles();
+    syncHud();
+  };
+
+  const beginRun = (): void => {
+    phase = "running";
     syncHud();
     spawnMole(holes, performance.now(), upMsForScore(0));
     paintHoles();
     raf = requestAnimationFrame(frame);
   };
 
+  const retry = (): void => {
+    resetReady();
+    beginRun();
+  };
+
   holeButtons.forEach((btn) => {
     btn.addEventListener("pointerdown", (e) => {
       e.preventDefault();
       unlockAudio();
+      if (phase === "ready") {
+        sfx.tap();
+        beginRun();
+        return;
+      }
       if (phase === "over") {
         sfx.tap();
-        start();
+        retry();
         return;
       }
       if (phase !== "running") return;
@@ -195,12 +215,26 @@ export function renderMole(root: HTMLElement): void {
 
   againBtn?.addEventListener("click", () => {
     sfx.tap();
-    start();
+    unlockAudio();
+    if (phase === "ready") beginRun();
+    else retry();
   });
+
+  const onKey = (e: KeyboardEvent): void => {
+    if (e.code !== "Space" && e.key !== " ") return;
+    e.preventDefault();
+    unlockAudio();
+    if (phase === "ready") beginRun();
+    else if (phase === "over") retry();
+  };
+  window.addEventListener("keydown", onKey);
 
   const host = root as HTMLElement & { __moleCleanup?: () => void };
   host.__moleCleanup?.();
-  host.__moleCleanup = stop;
+  host.__moleCleanup = () => {
+    stop();
+    window.removeEventListener("keydown", onKey);
+  };
 
-  start();
+  resetReady();
 }
