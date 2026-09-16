@@ -186,6 +186,13 @@ export function renderSnake(root: HTMLElement): void {
         cell - pad * 2,
       );
     });
+
+    if (phase === "ready") {
+      ctx.fillStyle = "rgba(232, 244, 241, 0.92)";
+      ctx.font = "700 22px Syne, sans-serif";
+      ctx.textAlign = "center";
+      ctx.fillText("Tap Start to play", canvas.width / 2, canvas.height * 0.52);
+    }
   };
 
   const queueDir = (next: Dir): void => {
@@ -284,7 +291,11 @@ export function renderSnake(root: HTMLElement): void {
 
     if (e.key === " " || e.code === "Space") {
       e.preventDefault();
-      if (phase === "running") {
+      unlockAudio();
+      if (phase === "ready" || phase === "over") {
+        sfx.tap();
+        reset(true);
+      } else if (phase === "running") {
         phase = "paused";
         stopLoop();
         paint();
@@ -312,6 +323,6 @@ export function renderSnake(root: HTMLElement): void {
     stopLoop();
   };
 
-  // kids can play right away — no extra Start tap
-  reset(true);
+  // Wait for Start / direction / tap so players can read the how-to first.
+  reset(false);
 }
